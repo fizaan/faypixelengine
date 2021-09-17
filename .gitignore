@@ -5,7 +5,6 @@
 *.gb
 *.bin
 *_asm*
-*.jar
 bin/
 build/
 dist/
@@ -13,6 +12,5 @@ blargg/
 verbose.txt
 !.gitignore
 logs/
-lib/
 bak/
 chip8out/
