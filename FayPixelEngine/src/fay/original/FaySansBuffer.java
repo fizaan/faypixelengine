@@ -187,6 +187,10 @@ public abstract class FaySansBuffer extends JPanel implements ActionListener {
 		g2d.drawImage(sprite, (int)pos.x, (int) pos.y, sprite.getWidth() * scaleX, sprite.getHeight() * scaleY, null);
 	}
 	
+	public void drawMirroredScaledSprite(Vf2d pos, BufferedImage sprite, int scaleX, int scaleY) {
+		g2d.drawImage(sprite, (int)pos.x + sprite.getWidth(), (int) pos.y, -sprite.getWidth() * scaleX, sprite.getHeight() * scaleY, null);
+	}
+	
 	// draw rotated decal - new
 	// TUTORIAL---Decals
 	// "The first argument is the location in screen space where the decal should be drawn. 

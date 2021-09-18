@@ -98,6 +98,7 @@ public class Player extends Ball {
 	public float startXPosition() { return intStartingXPosition; }
 	public boolean movingRight() { return bMovingRight; }
 	public void setDirBoolean(boolean bMovingRight) { this.bMovingRight = bMovingRight; }
+	public boolean direction() { return bMovingRight; } 
 	public void setJumpAngle(float fJumpAngle) { this.fJumpAngle = fJumpAngle; }
 	public float angle() { return fJumpAngle; }
 	public float fXSpeedAtJump() { return fXSpeedAtJump; }

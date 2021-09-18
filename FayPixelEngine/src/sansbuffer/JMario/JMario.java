@@ -31,6 +31,16 @@ public class JMario extends FaySansBuffer {
 	private Map<Integer, JMarioRay> rays;
 	private List<Wall> barriers;
 	
+	// mario pose
+	private int pose;
+	
+	// distance ran
+	private float distance;
+	
+	// poses
+	public static final int POSE_IDLE = 5;
+	public static final int POSE_JUMP = 50;
+	
 	// 'movingBrickPosX/Y' are just to test the moving brick/barrier - they serve no other purpose
 	private float movingBrickPosX, movingBrickPosY;
 	
@@ -60,6 +70,10 @@ public class JMario extends FaySansBuffer {
 
 	@Override
 	public boolean OnUserUpdate(float fElapsedTime) {
+	
+	 // distance calculated. See E7 - Animation 11:00	
+	 distance += Math.abs(mario.velocity.x) * fElapsedTime * 25;	
+		
 	 clearConsole(Color.WHITE);
 	 
 	 // uncomment below to see FR w/ ITER
@@ -94,12 +108,28 @@ public class JMario extends FaySansBuffer {
 	 drawScaledSprite(new Vf2d(x, y), img, scaleX, scaleY);
 	}
 	
+	private void drawMarioTile(BufferedImage img, int x, int y, int scaleX, int scaleY) {
+	 
+	 x *= scaleX;
+	 y *= scaleY;
+	 
+	 // check mario's direction
+	 
+	 if(mario.direction())
+		 drawScaledSprite(new Vf2d(x, y), img, scaleX, scaleY);
+	 else
+		 drawMirroredScaledSprite(new Vf2d(x, y), img, scaleX, scaleY);
+	}
+	
 	private void drawMario(float fElapsedTime) {
-	 boolean bTileBasedSpacing = false;
 	 drawMarioTile(
-	 individualTiles.get("idleMario"), 
+	 individualTiles.get(chooseMario(pose)), 
 	 (int)mario.location.x, 
-	 (int)mario.location.y, 1,1,bTileBasedSpacing);
+	 (int)mario.location.y, 1,1);
+	}
+	
+	private int distance() {
+		return (int) (Math.floor(distance) % 3);
 	}
 	
 	// ::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -314,13 +344,13 @@ public class JMario extends FaySansBuffer {
 	private void KBInput(float fElapsedTime) {
 		switch(EventListener.keyPressedEvent) {
 		
-			case KeyEvent.VK_RIGHT:
-				if(FaySansBuffer.VP_X + VP_LEN <= getConsoleWidth()) FaySansBuffer.VP_X++;
-			break;
-			
-			case KeyEvent.VK_LEFT:
-				if(FaySansBuffer.VP_X >= 0) FaySansBuffer.VP_X--;
-			break;
+//			case KeyEvent.VK_RIGHT:
+//				if(FaySansBuffer.VP_X + VP_LEN <= getConsoleWidth()) FaySansBuffer.VP_X++;
+//			break;
+//			
+//			case KeyEvent.VK_LEFT:
+//				if(FaySansBuffer.VP_X >= 0) FaySansBuffer.VP_X--;
+//			break;
 			
 			case KeyEvent.VK_R:
 				mario.reset();
@@ -341,7 +371,16 @@ public class JMario extends FaySansBuffer {
 				// you do this and explain your observation.
 				//		mario.location.y = mario.groundPosition() - 20;
 				// :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-				if(!mario.airbourne()) mario.location.y = mario.groundPosition();
+				if(!mario.airbourne()) {
+					
+					mario.location.y = mario.groundPosition();
+					
+					pose = distance();
+					
+					//pose = 3;
+				}
+				else
+					pose = POSE_JUMP;
 				
 				// he's moving right so set this to true
 				mario.setDirBoolean(true);
@@ -357,11 +396,21 @@ public class JMario extends FaySansBuffer {
 				
 				// set which key was pressed to show in status window
 				keys = "RIGHT";
+				
 			break;
 			
 			case KeyEvent.VK_S: // move <-
 				// as above
-				if(!mario.airbourne()) mario.location.y = mario.groundPosition();
+				if(!mario.airbourne()) { 
+					
+					mario.location.y = mario.groundPosition();
+					
+					pose = distance();
+				}
+				
+				else
+					
+					pose = POSE_JUMP;
 				
 				// he's moving left so set this to false
 				mario.setDirBoolean(false);
@@ -398,6 +447,8 @@ public class JMario extends FaySansBuffer {
 				
 				// as above
 				keys = "RIGHT+JUMP";
+				
+				pose = POSE_JUMP;
 			break;
 			
 			case KeyEvent.VK_S | KeyEvent.VK_J:
@@ -419,6 +470,8 @@ public class JMario extends FaySansBuffer {
 				
 				// as above
 				keys = "LEFT+JUMP";
+				
+				pose = POSE_JUMP;
 			break;
 			
 			case KeyEvent.VK_J:
@@ -433,6 +486,8 @@ public class JMario extends FaySansBuffer {
 				
 				// as above
 				keys = "JUMP";
+				
+				pose = POSE_JUMP;
 			break;
 			
 			case  KeyEvent.VK_D | KeyEvent.VK_K:
@@ -459,14 +514,18 @@ public class JMario extends FaySansBuffer {
 					mario.location.y = mario.groundPosition();
 					mario.velocity.setPosition(0, 0);
 					mario.acceleration.setPosition(0, 0);
+					pose = POSE_IDLE;
 				} else {
 					mario.velocity.setAngledPosition(-mario.angle());	
 					mario.updatePosition();
 				}
 				keys = "N/A";
+				
+				distance = 0;
 					
 			break;
 		} // end switch
+		
 	} // end function
 	
 	private void showStatus() {
@@ -529,68 +588,28 @@ public class JMario extends FaySansBuffer {
 	 // characters sheet
 	 Sprite characters = new Sprite(System.getProperty("user.dir") + "\\img\\jmario\\characters.gif");
 	 
-	 // add individual tiles from the one tilesheet
+	 // load level JSON file
+	 // "class java.lang.String cannot be cast to class org.json.simple.JSONArray"
+	 // Make sure that the string is a valid JSON
+	 // stackoverflow.com/questions/25567041/
+	 String jsonFile = System.getProperty("user.dir") + "\\src\\sansbuffer\\JMario\\1-1.json";
+	 FayUtils.loadJson(jsonFile);
 	 
-	 individualTiles = new HashMap<String,BufferedImage>();
+	 // select the background mode (lite or dark)
 	 
-	 // ground tile
-	 individualTiles.put("ground",
-			 (BufferedImage) tilesheet.partialSprite(
-					 new Vf2d(0 * tileBlock.x, 0 * tileBlock.y),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
+	 Iterator<JSONObject> bgmode = FayUtils.getIterator("bgmode");
 	 
-	 // barrier tile
-	 individualTiles.put("barrier",
-			 (BufferedImage) tilesheet.partialSprite(
-					 new Vf2d(0 * tileBlock.x, 0 * tileBlock.y),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
+	 JSONObject jsonObj = bgmode.next();
 	 
-	// brick tile 1
-	individualTiles.put("brick1",
-			 (BufferedImage) tilesheet.partialSprite(
-					 new Vf2d(1 * tileBlock.x, 0 * tileBlock.y),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
-	
-	// brick tile 2
-	individualTiles.put("brick2",
-			 (BufferedImage) tilesheet.partialSprite(
-					 new Vf2d(2 * tileBlock.x, 0 * tileBlock.y),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
-	
-	// question tile 1
-	individualTiles.put("q1",
-			 (BufferedImage) tilesheet.partialSprite(
-					 new Vf2d(24 * tileBlock.x, 0 * tileBlock.y),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
+	 String mode = jsonObj.get("type").toString();	 
 	 
-	 // multiple moving barrier tiles
-	 try {
-	  
-	  BufferedImage mulBarrierTiles = tilesheet.multipleXPlaneImage(individualTiles.get("brick1"), 3);
-	  
-	  individualTiles.put("movingBarriers", mulBarrierTiles);
+	 if(mode.equals("lite")) litemode(tilesheet, characters);
 	 
-	 } catch (FayPixelEngineException fpe) {
-	  
-	  System.exit(1);	 
-		 
-	 }
+	 else 					 darkmode(tilesheet, characters);
 	 
-	 // sky tile starts at block (3,23)
-	 // "Looks like it's about 3 and 23 or something"
-	 individualTiles.put("sky",
-			 (BufferedImage) tilesheet.partialSprite(
-					 new Vf2d(3 * tileBlock.x, 23 * tileBlock.y),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
+	 addMarioTiles(characters);
 	 
-	 // characters.gif are 513 x 401
-	 // idle mario. He uses absolute positioning here in pixels, not blocks.
-	 // hence, 17 becomes 276 and 3 becomes 44.
-	 individualTiles.put("idleMario",
-			 (BufferedImage) characters.partialSprite(
-					 new Vf2d(276, 44),  
-					 new Vf2d(tileBlock.x, tileBlock.y)));
-	 
+	 	 
 	 // define mario's starting position at 64,64 going down
 	 // at a 45 deg angle
 	 // mario = new Ray(64,64,1.0f,StaticHelper.degToRad(45));
@@ -624,16 +643,9 @@ public class JMario extends FaySansBuffer {
 	 // :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 	 
 	 mario.initFloats(Player.INIT_JUMP_ANGLE, 0.5f, 0.005f, 0.85f, 0.05f, 0.03f, 1.2f);
-	 mario.initInts(176, 1);
+	 mario.initInts(176, 5);
 	 mario.location.setPosition(mario.startXPosition(), mario.groundPosition());
-	 mario.setDirBoolean(false);
-	 
-	 // load level JSON file
-	 // "class java.lang.String cannot be cast to class org.json.simple.JSONArray"
-	 // Make sure that the string is a valid JSON
-	 // stackoverflow.com/questions/25567041/
-	 String jsonFile = System.getProperty("user.dir") + "\\src\\sansbuffer\\JMario\\1-1.json";
-	 FayUtils.loadJson(jsonFile);
+	 mario.setDirBoolean(true);
 	 
 	 createStatusWindow(400, 400);
 	 
@@ -645,5 +657,186 @@ public class JMario extends FaySansBuffer {
 	 
 	 return true;
 	} // end function
+	
+	private void addMarioTiles(Sprite characters) {
+	 // characters.gif are 513 x 401
+	 // idle mario. He uses absolute positioning here in pixels, not blocks.
+	 // hence, 17 becomes 276 and 3 becomes 44.
+	 
+	individualTiles.put("idleMario",
+		 (BufferedImage) characters.partialSprite(
+			 new Vf2d(276, 44),  
+			 new Vf2d(tileBlock.x, tileBlock.y)));
+	 
+	 // run-1
+	
+	 // for these magic numbers see E7 - Animation @ 7:59
+	 individualTiles.put("run-1",
+		 (BufferedImage) characters.partialSprite(
+			 new Vf2d(290, 44),  
+			 new Vf2d(tileBlock.x, tileBlock.y)));
+	 
+	 // run-2
+	 individualTiles.put("run-2",
+		 (BufferedImage) characters.partialSprite(
+			 new Vf2d(304, 44),  
+			 new Vf2d(tileBlock.x, tileBlock.y)));
+	 
+	 // run-3
+	 individualTiles.put("run-3",
+		 (BufferedImage) characters.partialSprite(
+			 new Vf2d(321, 44),  
+			 new Vf2d(tileBlock.x, tileBlock.y)));
+	 
+	 // I think he only goes up to 3 when running so we don't need run-4
+	 
+	 // run-4
+	 individualTiles.put("run-4",
+		 (BufferedImage) characters.partialSprite(
+			 new Vf2d(339, 44),  
+			 new Vf2d(tileBlock.x, tileBlock.y)));
+	 
+	 // jumping mario
+	 
+	 individualTiles.put("jumpingMario",
+		 (BufferedImage) characters.partialSprite(
+			 new Vf2d(356, 44),  
+			 new Vf2d(tileBlock.x, tileBlock.y)));
+	 
+	}
+	
+	private String chooseMario(int i) {
+		
+		switch(i) {
+			case POSE_IDLE: return "idleMario";
+			
+			case 0: 		return "run-1"; 
+			
+			case 1: 		return "run-2";
+			
+			case 2: 		return "run-3";
+			
+			case 3: 		return "run-4"; 
+			
+			case POSE_JUMP: return "jumpingMario";
+			
+			default: return "idleMario";
+		}
+	}
+	
+	private void litemode(Sprite tilesheet, Sprite characters) {
+		// add individual tiles from the one tilesheet
+		 
+		 individualTiles = new HashMap<String,BufferedImage>();
+		 
+		 // ground tile
+		 individualTiles.put("ground",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(0 * tileBlock.x, 0 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		 
+		 // barrier tile
+		 individualTiles.put("barrier",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(0 * tileBlock.x, 0 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		 
+		// brick tile 1
+		individualTiles.put("brick1",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(1 * tileBlock.x, 0 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		
+		// brick tile 2
+		individualTiles.put("brick2",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(2 * tileBlock.x, 0 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		
+		// question tile 1
+		individualTiles.put("q1",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(24 * tileBlock.x, 0 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		 
+		 // multiple moving barrier tiles
+		 try {
+		  
+		  BufferedImage mulBarrierTiles = tilesheet.multipleXPlaneImage(individualTiles.get("brick1"), 3);
+		  
+		  individualTiles.put("movingBarriers", mulBarrierTiles);
+		 
+		 } catch (FayPixelEngineException fpe) {
+		  
+		  System.exit(1);	 
+			 
+		 }
+		 
+		 // sky tile starts at block (3,23)
+		 // "Looks like it's about 3 and 23 or something"
+		 individualTiles.put("sky",
+			 (BufferedImage) tilesheet.partialSprite(
+				 new Vf2d(3 * tileBlock.x, 23 * tileBlock.y),  
+				 new Vf2d(tileBlock.x, tileBlock.y)));
+
+	}
+	
+	private void darkmode(Sprite tilesheet, Sprite characters) {
+		// add individual tiles from the one tilesheet
+		 
+		 individualTiles = new HashMap<String,BufferedImage>();
+		 
+		 // ground tile
+		 individualTiles.put("ground",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(0 * tileBlock.x, 2 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		 
+		 // barrier tile
+		 individualTiles.put("barrier",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(0 * tileBlock.x, 2 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		 
+		// brick tile 1
+		individualTiles.put("brick1",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(1 * tileBlock.x, 2 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		
+		// brick tile 2
+		individualTiles.put("brick2",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(2 * tileBlock.x, 2 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		
+		// question tile 1
+		individualTiles.put("q1",
+				 (BufferedImage) tilesheet.partialSprite(
+						 new Vf2d(24 * tileBlock.x, 6 * tileBlock.y),  
+						 new Vf2d(tileBlock.x, tileBlock.y)));
+		 
+		 // multiple moving barrier tiles
+		 try {
+		  
+		  BufferedImage mulBarrierTiles = tilesheet.multipleXPlaneImage(individualTiles.get("brick1"), 3);
+		  
+		  individualTiles.put("movingBarriers", mulBarrierTiles);
+		 
+		 } catch (FayPixelEngineException fpe) {
+		  
+		  System.exit(1);	 
+			 
+		 }
+		 
+		 // sky tile starts at block (3,23)
+		 // "Looks like it's about 3 and 23 or something"
+		 individualTiles.put("sky",
+			 (BufferedImage) tilesheet.partialSprite(
+				 new Vf2d(22 * tileBlock.x, 3 * tileBlock.y),  
+				 new Vf2d(tileBlock.x, tileBlock.y)));
+
+	}
+
 
 }
