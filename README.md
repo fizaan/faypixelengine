@@ -63,7 +63,12 @@ public class HelloWorldSkeleton extends FaySansBuffer {
 
 ...then compile run the example from your command line prompt (if you prefer) using Maven
 
+```
 prompt>PATHTO\faypixelengine\FayPixelEngine>mvn clean
+
 prompt>PATHTO\faypixelengine\FayPixelEngine>mvn compile
+
 prompt>PATHTO\faypixelengine\FayPixelEngine>mvn exec:java -Dexec.mainClass="helloworld.HelloWorld" -Dexec.classpathScope=runtime
+
 prompt>PATHTO\faypixelengine\FayPixelEngine>mvn exec:java -Dexec.mainClass="helloworld.HelloWorldSkeleton" -Dexec.classpathScope=runtime
+```
