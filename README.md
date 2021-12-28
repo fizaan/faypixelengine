@@ -11,17 +11,12 @@ this tool will be useful for beginners as well as intermediate developers alike.
 
 - Technical requirements
 
-This project was tested with Java v13 on Windows 10, but it should run with 1.8 as well. You will need Maven Apache Maven 3+. I used
-
-Apache Maven 3.5.3
+This project was tested with Java v13 on Windows 10, but it should run with 1.8 as well. You will need Maven Apache Maven 3+.
 
 - Setup
 
-Import this repo into Eclipse or your favourite Java IDE. Add the json-simple-1.1.1.jar dependency.
-
-- Getting started
-
-Run the src/helloworld examples to get started. Essentially, here is all you need:
+Import this repo then run the src/helloworld examples to get started. Please see the bottom for compiling and running using maven
+Essentially, here is all you need to do:
 
 ```
 package helloworld;
