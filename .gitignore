@@ -3,9 +3,11 @@
 *.tar*
 *.obj
 *.gb
+*.jar
 *.bin
 *_asm*
 bin/
+target/
 build/
 dist/
 blargg/

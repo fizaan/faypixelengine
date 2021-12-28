@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>game.fay.FayPixelEngine</groupId>
+    <artifactId>FayPixelEngine</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0</version>
+    <name>FayPixelEngine</name>
+    <description>FayPixelEngine Run</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <sourceDirectory>src</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+                
+                
+                <!-- to run main method -->
+                <!-- mvn exec:java -Dexec.mainClass="dos.JColour" -Dexec.classpathScope=runtime -->
+                <executions>  
+		    <execution>  
+		     <phase>test</phase>  
+		     <goals>  
+		      <goal>java</goal>  
+		     </goals>  
+		     <configuration>  
+		      <mainClass>fay.main.clazz</mainClass>  
+		      <arguments>  
+		       <argument>arg0</argument>  
+		       <argument>arg1</argument>  
+		      </arguments>  
+		     </configuration>  
+		    </execution>  
+   		</executions>
+   		<!--end main -->
+                
+                
+            </plugin>
+            <!-- 'mvn clean test' -->
+                <!-- OR -->
+            <!-- 'mvn clean test -Dsurefire.suiteXmlFiles=testng.xml' -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.20.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.SimpleFormatter.format>
+                            %1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS [%4$s] [%2$s] - %5$s%6$s%n
+                        </java.util.logging.SimpleFormatter.format>
+                    </systemPropertyVariables>
+                    <parallel>tests</parallel>
+                    <threadCount>2</threadCount>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>org.gsic.Common.Listeners.ScreenshotOnFail</value>
+                        </property>
+                        <property>
+                            <name>listener</name>
+                            <value>org.gsic.Common.Listeners.CustomReporter</value>
+                        </property>
+                    </properties>
+                </configuration>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>2.17</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>8.5</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
+            <!-- Cmd: 'mvn jxr:jxr pmd:pmd'-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.8</version>
+                <configuration>
+                    <linkXRef>true</linkXRef>
+                    <sourceEncoding>utf-8</sourceEncoding>
+                    <language>java</language>
+                    <targetJdk>1.8</targetJdk>
+                    <rulesets>
+                        <ruleset>java-basic</ruleset>
+                        <ruleset>java-design</ruleset>
+                        <ruleset>java-unnecessary</ruleset>
+                        <ruleset>java-unusedcode</ruleset>
+                        <ruleset>java-naming</ruleset>
+                    </rulesets>
+                </configuration>
+            </plugin>
+            <!-- Cmd: 'mvn checkstyle:checkstyle'-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>2.17</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>checkstyle</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <dependencies>
+        <!-- https://bintray.com/cbeust/maven/testng -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.10</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-server -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>3.8.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.diogonunes/JColor -->
+        <dependency>
+            <groupId>com.diogonunes</groupId>
+            <artifactId>JColor</artifactId>
+            <version>5.0.0</version>
+        </dependency>
+        
+        <!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+		<dependency>
+		    <groupId>com.googlecode.json-simple</groupId>
+		    <artifactId>json-simple</artifactId>
+		    <version>1.1.1</version>
+		</dependency>
+
+        
+
+
+    </dependencies>
+
+</project>
