@@ -15,8 +15,7 @@ This project was tested with Java v13 on Windows 10, but it should run with 1.8 
 
 - Setup
 
-Import this repo then run the src/helloworld examples to get started. Please see the bottom for compiling and running using maven
-Essentially, here is all you need to do:
+Import this repo then run the src/helloworld examples to get started. Please see the bottom for compiling and running using maven. Essentially, here is all you need to do:
 
 ```
 package helloworld;
