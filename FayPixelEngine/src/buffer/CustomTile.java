@@ -14,20 +14,16 @@ public class CustomTile extends FayBuffer {
 	public static final int GB_COL_LIGHT_GREEN   = 0x99c886;
 	public static final int GB_COL_DARK_GREEN    = 0x437969;
 	public static final int GB_COL_BLACK         = 0x051f2a;
-	private int hByte, lByte;
-	private int[] hBits, lBits;
 	
 	public CustomTile(int len, int hei, int pX, int pY, String title) {	 
 	 super(len,hei,pX,pY,title);
-	 hBits = new int[8];
-	 lBits = new int[8];
 	}
 	
-	public void setHB(int b) { hByte = b; }
-	public void setLB(int b) { lByte = b; }
-	
-	public int[] getPixels() {
+	public int[] getPixels(int hByte, int lByte) {
 		int[] pixels = new int[8];
+		int[] hBits, lBits;
+		hBits = new int[8];
+		lBits = new int[8];
 		hBits[0] = (hByte & 0b10000000) >> 7;
 		hBits[1] = (hByte & 0b01000000) >> 6;
 		hBits[2] = (hByte & 0b00100000) >> 5;
@@ -65,8 +61,8 @@ public class CustomTile extends FayBuffer {
 		drawSprite(new Vf2d(100, 100), new Vf2d(16, 16), tile);
 		
 		tile = new int[16]; // The letter 'A'
-		tile[0]  = 0x7c;
-		tile[1]  = 0x7c;
+		tile[0]  = 0x7c;    // low  byte
+		tile[1]  = 0x7c;    // high byte
 		tile[2]  = 0;
 		tile[3]  = 0xc6;
 		tile[4]  = 0xc6;
@@ -86,9 +82,7 @@ public class CustomTile extends FayBuffer {
 		
 		int index = 0;
 		for(int i = 0; i < tile.length; i += 2) {
-		 setHB(tile[i]);
-		 setLB(tile[i+1]);
-		 int[] pixels = getPixels();
+		 int[] pixels = getPixels(tile[i+1], tile[i] );
 		 for(int j = 0; j < pixels.length; j++) 
 		  try { newTile[index++] = getColor(pixels[j]); } 
 		  catch(FayPixelEngineException fpe) { fpe.printStackTrace(); System.exit(-1); }
