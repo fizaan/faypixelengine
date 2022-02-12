@@ -12,6 +12,8 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
@@ -29,6 +31,7 @@ import fay.math.Vf2d;
 import fay.events.EventListener;
 import fay.events.Mouse;
 import fay.events.MouseEventListener;
+import fay.exceptions.FayPixelEngineException;
 
 @SuppressWarnings("serial")
 public abstract class FayBuffer extends JPanel implements ActionListener {
@@ -41,6 +44,7 @@ public abstract class FayBuffer extends JPanel implements ActionListener {
 	private EventListener eventListener;
 	private MouseEventListener mouseMotionListener;
 	private int eventCode, mouseMoveEventCodeX, mouseMoveEventCodeY, mouseX, mouseY;
+	private List<Integer> palette;
 	private Timer timer;
 	private boolean pause, allowPause;
 	long then,now;
@@ -63,6 +67,7 @@ public abstract class FayBuffer extends JPanel implements ActionListener {
 		fBuffer = gfxConfig.createCompatibleImage(len, hei);
 		eventListener = new EventListener();
 		mouseMotionListener = new MouseEventListener();
+		palette = new ArrayList<Integer>();
 		
 		init();
 		
@@ -77,6 +82,7 @@ public abstract class FayBuffer extends JPanel implements ActionListener {
 		fBuffer = gfxConfig.createCompatibleImage(len, hei);
 		eventListener = new EventListener();
 		mouseMotionListener = new MouseEventListener();
+		palette = new ArrayList<Integer>();
 		this.len = len;
 		this.hei = hei;
 		this.pixelW = pixelW;
@@ -108,6 +114,12 @@ public abstract class FayBuffer extends JPanel implements ActionListener {
 	public Timer timer() { return timer; }
 	public void setResizable() { console.setResizable(true); }
 	public void allowPause() { allowPause = !allowPause; }
+	public void addColor(int c) { palette.add(c); }
+	public int getColor(int index) throws FayPixelEngineException { 
+	 if(index >= palette.size()) 
+		 throw new FayPixelEngineException(String.format("%d >= palette of size %d", index, palette.size()));
+	 return palette.get(index); 
+	}
 	
 	public static void updateVP(Vf2d player) {
 	 if(player.x > VP_X_OFFSET) VP_X = (int) player.x - VP_X_OFFSET;
